@@ -1,1 +1,1 @@
-A crawl example implemented by scrapy
+A crawl example implementing with scrapy
