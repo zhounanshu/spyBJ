@@ -3,9 +3,7 @@
 from bs4 import BeautifulSoup
 import urllib2
 
-response = urllib2.urlopen('http://www.bjdata.gov.cn/zyml/dzwj/rjyxxfwy/index.htm')
+response = urllib2.urlopen('http://data.nanhai.gov.cn/cms/sites/sjzy/load_sj_theme.jsp?tid=all&page=1')
 html = response.read()
-soup = BeautifulSoup(html)
-for s in soup.find_all('option', text='htm'):
-    print s['value']
+print html
 

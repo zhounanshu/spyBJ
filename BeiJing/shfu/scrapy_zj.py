@@ -36,7 +36,10 @@ def data_herfs(html):
 
 
 def get_format(f):
-    return '.' in f and f.rsplit('.', 1)[1]
+    if '.' in f and f.rsplit('.', 1)[1]:
+        return '.' in f and f.rsplit('.', 1)[1]
+    else:
+        return ''
 
 
 def paser(html):
@@ -74,12 +77,18 @@ def paser(html):
     if len(file_names) != 0:
         buf = {}
         for i in range(len(file_names)):
-            buf['file_name'] = file_names[i]
+            buf['file_name'] = str(file_names[i])
             buf['desc'] = temp['资源摘要']
-            buf['tag'] = temp['关键字']
+            if temp.has_key('关键字'):
+                buf['tag'] = temp['关键字']
+            else:
+                buf['tag'] = ''
             buf['publication_date'] = temp['信息资源发布日期']
             buf['orgnization'] = '浙江' + temp['信息资源提供方']
-            buf['update_freq'] = temp['更新频率'].split('&')[0]
+            if temp.has_key('更新频率'):
+                buf['update_freq'] = temp['更新频率'].split('&')[0]
+            else:
+                buf['update_freq'] = ''
             buf['file_format'] = get_format(file_names[i])
             buf['downloads'] = downloads[i]
             buf['update_date'] = updates[i][:4] + '-' + \
@@ -92,12 +101,18 @@ def paser(html):
         file_name_reg = r'href="(.*)">http:'
         file_name_re = re.compile(file_name_reg)
         file_name = re.findall(file_name_re, html)
-        buf['file_name'] = file_name
+        buf['file_name'] = str(file_name)
         buf['desc'] = temp['资源摘要']
-        buf['tag'] = temp['关键字']
+        if temp.has_key('关键字'):
+            buf['tag'] = temp['关键字']
+        else:
+            buf['tag'] = ''
         buf['publication_date'] = temp['信息资源发布日期']
         buf['orgnization'] = '浙江' + temp['信息资源提供方']
-        buf['update_freq'] = temp['更新频率'].split('&')[0]
+        if temp.has_key('更新频率'):
+            buf['update_freq'] = temp['更新频率'].split('&')[0]
+        else:
+            buf['update_freq'] = ''
         buf['file_format'] = get_format(file_name)
         buf['downloads'] = None
         buf['update_date'] = None
@@ -150,7 +165,7 @@ def upload_data(data_id, title, desc,
                                db='shfd',
                                charset='utf8')
         cur = conn.cursor()
-        sql = "insert into zhejiang(data_id, title, descr,\
+        sql = "insert into zhejiang_api(data_id, title, descr,\
                     tag, category, orgnization, \
                     num_of_download, updated_date, format, \
                     publication_date,update_frequency,update_on_time, \
@@ -180,10 +195,13 @@ hrefs = []
 for catecode in catecodes:
     # 进入分类目录
     payload = {'catecode': catecode}
-    r = requests.post("http://data.zjzwfw.gov.cn/toCate.action", data=payload)
+    headers = {'User-Agent': 'Mozilla/5.1'}
+    r = requests.post(
+        "http://data.zjzwfw.gov.cn/toCate.action", data=payload, headers=headers)
     numPerPage = totalPages(r.text.encode('utf-8'))
     # 获取总的数据集个数
     if numPerPage is not None:
+        print "the page num is " + str(numPerPage)
         # 获取单个数据集页面url
         payload = {
             'catecode': catecode, 'pageNum': '1', 'numPerPage': numPerPage}
@@ -192,6 +210,9 @@ for catecode in catecodes:
         hrefs.extend(data_herfs(r.text.encode('utf-8')))
 # 获取关键参数
 url_base = 'http://data.zjzwfw.gov.cn/'
+# url_base = 'http://data.zjzwfw.gov.cn/interfacelist.action'
+pageURL = 'http://data.zjzwfw.gov.cn/interfacelist.action?deptName=&frontcode=&pageNum=1&numPerPage=160'
+hrefs = data_herfs(requests.post(pageURL).text.encode('utf-8'))
 i = 0
 error_buf = []
 for href in hrefs:
@@ -214,6 +235,7 @@ for href in hrefs:
         update_on_time = update_ontime(k['update_date'], k['publication_date'])
         num_of_files = k['num_of_files']
         file_name = k['file_name']
+        print k
         if not upload_data(data_id, title, desc,
                            tag, category, orgnization,
                            num_of_download, updated_date, format,

@@ -220,11 +220,3 @@ for data_id in data_ids:
         error_buf.append(url)
 for error_url in error_buf:
     print error_url
-# r = requests.post('http://data.qingdao.gov.cn/data/gov/detail.htm?cata_id=9580001').text.encode('utf-8')
-# format = get_format(r)
-# print format
-# if format == '':
-#     format = get_num_files(r)[1]
-# print format
-# if not upload_data('1', '1', '1' , '1','1', '1', '1' , '1','1', '1', '1' , '1','1', '1', '1' , '1'):
-#     print "insert error!"

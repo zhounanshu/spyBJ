@@ -94,7 +94,7 @@ def paser(html):
             if temp.has_key('更新频率'):
                 buf['update_freq'] = temp['更新频率'].split('&')[0]
             else:
-                bif['update_freq'] = None
+                buf['update_freq'] = None
             buf['file_format'] = get_format(file_names[i])
             buf['downloads'] = downloads[i]
             buf['update_date'] = updates[i][:4] + '-' + \
@@ -124,13 +124,13 @@ def paser(html):
         else:
             buf['publication_date'] = None
         if temp.has_key('信息资源提供方'):
-            buf['orgnization'] = '杭州' + temp['信息资源提供方']
+            buf['orgnization'] = temp['信息资源提供方']
         else:
             buf['orgnization'] = None
         if temp.has_key('更新频率'):
             buf['update_freq'] = temp['更新频率'].split('&')[0]
         else:
-            bif['update_freq'] = None
+            buf['update_freq'] = None
         buf['file_format'] = 'html'
         buf['downloads'] = None
         buf['update_date'] = None
@@ -183,7 +183,7 @@ def upload_data(data_id, title, desc,
                                db='shfd',
                                charset='utf8')
         cur = conn.cursor()
-        sql = "insert into hangzhou(data_id, title, descr,\
+        sql = "insert into zhejiang(data_id, title, descr,\
                     tag, category, orgnization, \
                     num_of_download, updated_date, format, \
                     publication_date,update_frequency,update_on_time, \
@@ -213,7 +213,7 @@ hrefs = []
 for catecode in catecodes:
     # 进入分类目录
     payload = {'catecode': catecode}
-    r = requests.post("http://114.215.249.58/toCate.action", data=payload)
+    r = requests.post("http://data.zjzwfw.gov.cn/toCate.action", data=payload)
     numPerPage = totalPages(r.text.encode('utf-8'))
     # 获取总的数据集个数
     if numPerPage is not None:
@@ -221,10 +221,10 @@ for catecode in catecodes:
         payload = {
             'catecode': catecode, 'pageNum': '1', 'numPerPage': numPerPage}
         r = requests.post(
-            "http://114.215.249.58/toCate.action", data=payload)
+            "http://data.zjzwfw.gov.cn/toCate.action", data=payload)
         hrefs.extend(data_herfs(r.text.encode('utf-8')))
 # 获取关键参数
-url_base = 'http://114.215.249.58/'
+url_base = 'http://data.zjzwfw.gov.cn/'
 i = 0
 error_buf = []
 for href in hrefs:
@@ -253,6 +253,7 @@ for href in hrefs:
                            publication_date, update_frequency, update_on_time,
                            '', '', num_of_files, '', file_name):
             print "insert error!"
+            print k
             print i
             error_buf.append(url)
 for error_url in error_buf:

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import re
 import requests
-import urllib2
 import json
 import MySQLdb
 

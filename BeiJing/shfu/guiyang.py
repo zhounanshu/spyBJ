@@ -3,6 +3,7 @@
 import requests
 import re
 import MySQLdb
+from bs4 import BeautifulSoup
 
 
 def delete_white(arg):
@@ -33,17 +34,13 @@ def get_desc(html):
 
 
 def get_category(html):
-    categories = ['地方政府', '地方特色', '气候', '消费',
-                  '生态系统', '教育', '能源', '金融', '健康', '农业',
-                  '制造业', '商贸', '公共安全', '科学与研究']
-    topics = ['local', 'health', 'climate', 'consumer', 'ecosystems',
-              'education', 'energy', 'finance', 'health', 'food',
-              'manufacturing', 'business', 'safety', 'research']
-    cate_dict = dict(zip(topics, categories))
-    reg = r'/img/list_topics/topic-(.*)\.png'
-    pattern = re.compile(reg)
-    key = re.findall(pattern, html)[0]
-    category = cate_dict[key]
+    soup = BeautifulSoup(html, 'lxml')
+    s = soup.select('#content > div.toolbar > ol > li > a')
+    category = ''
+    if len(s) > 1:
+        category = re.findall(r'\S+', s[1].get_text())[0]
+    else:
+        print "there is something wrong"
     return category
 
 
@@ -184,17 +181,16 @@ for i in xrange(15):
     url = url_base + 'list.jsp?pageno=' + str(i + 1)
     r = requests.post(url).text.encode('utf-8')
     data_ids.extend(get_ids(r))
-    category = get_category(r)
 count = 0
 for data_id in data_ids:
     count += 1
-    # print count
     url = url_base + 'detail.jsp?dataid=' + data_id
     r = requests.post(url).text.encode('utf-8')
+    category = get_category(r)
     title = get_title(r)
     desc = get_desc(r)
     tag = get_tag(r)
-    orgnization = ''
+    orgnization = get_organization(data_id)
     num_of_download = get_downloads(r)
     updated_date = updates_visits(r)[0]
     format = get_format(r)[0]

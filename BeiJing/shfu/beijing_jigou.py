@@ -144,6 +144,7 @@ def get_detail(html, key):
     f.close()
     f = open('test.txt', 'r')
     for line in f.readlines():
+        buf = ''
         buf = get_infor(delete_white(line), key)
         if buf != '':
             break
@@ -224,7 +225,6 @@ for item in hrefs:
             htmls.append('index' + str(i))
     for k in htmls:
         item_url = item.replace('index', k)
-        print item_url
         r = requests.post(item_url).text.encode('utf-8')
         reg = r'class="hylName"(.*?)\.htm"'
         pattern = re.compile(reg, re.S)
