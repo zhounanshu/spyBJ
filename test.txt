@@ -1,2 +1,3 @@
-hi,this is not just a test!
+this is just a test!
 add something funny
+something strange
